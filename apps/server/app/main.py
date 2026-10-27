@@ -2,6 +2,7 @@
 from fastapi.middleware.cors import CORSMiddleware
 
 from .api.projects import router as projects_router
+from .api.universes import router as universes_router
 from .db.migrations import initialize_database
 
 initialize_database()
@@ -20,6 +21,7 @@ app.add_middleware(
 )
 
 app.include_router(projects_router)
+app.include_router(universes_router)
 
 
 @app.get("/api/health")

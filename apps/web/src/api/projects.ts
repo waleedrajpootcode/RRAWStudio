@@ -9,6 +9,17 @@ export type Project = {
 
 const API_BASE = "http://127.0.0.1:8000";
 
+export async function getProject(projectId: string): Promise<Project> {
+  const response = await fetch(`${API_BASE}/api/projects/${projectId}`);
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.detail ?? "Unable to load project.");
+  }
+
+  return response.json();
+}
+
 export async function listProjects(): Promise<Project[]> {
   const response = await fetch(`${API_BASE}/api/projects`);
   if (!response.ok) {

@@ -115,7 +115,14 @@ export default function ProjectsPage() {
                     <p>{project.description || "No description yet."}</p>
                     <small>{project.status === "active" ? "Active production" : "Archived"}</small>
                   </div>
-                  <button className="secondary-button" type="button">
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={() => {
+                      window.history.pushState({}, "", `/projects/${project.id}`);
+                      window.dispatchEvent(new PopStateEvent("popstate"));
+                    }}
+                  >
                     Open
                   </button>
                 </article>
