@@ -1,7 +1,7 @@
 ﻿from .connection import get_connection
 
 
-CURRENT_SCHEMA_VERSION = 2
+CURRENT_SCHEMA_VERSION = 3
 
 
 def _migration_1(connection) -> None:
@@ -43,6 +43,36 @@ def _migration_2(connection) -> None:
     )
 
 
+def _migration_3(connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS characters (
+            id TEXT PRIMARY KEY,
+            project_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            role TEXT NOT NULL DEFAULT '',
+            age TEXT NOT NULL DEFAULT '',
+            personality TEXT NOT NULL DEFAULT '',
+            appearance TEXT NOT NULL DEFAULT '',
+            hair TEXT NOT NULL DEFAULT '',
+            eyes TEXT NOT NULL DEFAULT '',
+            skin TEXT NOT NULL DEFAULT '',
+            body TEXT NOT NULL DEFAULT '',
+            clothing TEXT NOT NULL DEFAULT '',
+            colors TEXT NOT NULL DEFAULT '',
+            visual_style TEXT NOT NULL DEFAULT '',
+            voice TEXT NOT NULL DEFAULT '',
+            relationships TEXT NOT NULL DEFAULT '',
+            character_arc TEXT NOT NULL DEFAULT '',
+            facts TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+        )
+        """
+    )
+
+
 def initialize_database() -> None:
     connection = get_connection()
 
@@ -74,6 +104,14 @@ def initialize_database() -> None:
         connection.execute(
             "INSERT INTO schema_version (version, applied_at) VALUES (?, ?)",
             (2, datetime.now(timezone.utc).isoformat()),
+        )
+        current_version = 2
+
+    if current_version < 3:
+        _migration_3(connection)
+        connection.execute(
+            "INSERT INTO schema_version (version, applied_at) VALUES (?, ?)",
+            (3, datetime.now(timezone.utc).isoformat()),
         )
 
     connection.commit()
