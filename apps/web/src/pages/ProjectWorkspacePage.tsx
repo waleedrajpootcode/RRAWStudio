@@ -5,7 +5,7 @@ type WorkspaceModule = {
   eyebrow: string;
   description: string;
   status: "available" | "next";
-  path?: "universe" | "characters";
+  path?: "universe" | "characters" | "story" | "episodes";
 };
 
 const workspaceModules: WorkspaceModule[] = [
@@ -30,7 +30,16 @@ const workspaceModules: WorkspaceModule[] = [
     eyebrow: "STORY ENGINE",
     description:
       "Develop the concept, story structure, episodes and narrative direction.",
-    status: "next",
+    status: "available",
+    path: "story",
+  },
+  {
+    name: "Episodes",
+    eyebrow: "EPISODE STUDIO",
+    description:
+      "Structure episodes, chapters and production-ready scenes.",
+    status: "available",
+    path: "episodes",
   },
   {
     name: "Scenes",
@@ -128,7 +137,7 @@ export default function ProjectWorkspacePage() {
               <p className="eyebrow">PRODUCTION PIPELINE</p>
               <h3>Studio modules</h3>
             </div>
-            <span>2 available</span>
+            <span>4 available</span>
           </div>
 
           <div className="project-list">

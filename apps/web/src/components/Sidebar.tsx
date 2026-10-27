@@ -59,6 +59,13 @@ function NavIcon({ label }: { label: string }) {
           <path d="M8 8h8M8 12h8M8 16h5" />
         </svg>
       );
+    case "Episodes":
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 5h14v14H5z" />
+          <path d="M8 9h8M8 13h6" />
+        </svg>
+      );
     case "Scenes":
       return (
         <svg {...common}>
@@ -128,6 +135,7 @@ const navItems: NavItem[] = [
   { label: "Universe", icon: <NavIcon label="Universe" /> },
   { label: "Characters", icon: <NavIcon label="Characters" /> },
   { label: "Story", icon: <NavIcon label="Story" /> },
+  { label: "Episodes", icon: <NavIcon label="Episodes" /> },
   { label: "Scenes", icon: <NavIcon label="Scenes" /> },
   { label: "Shots", icon: <NavIcon label="Shots" /> },
   { label: "Assets", icon: <NavIcon label="Assets" /> },
