@@ -8,6 +8,7 @@ from .api.stories import router as stories_router
 from .api.episodes import router as episodes_router
 from .api.chapters import router as chapters_router
 from .api.scenes import router as scenes_router
+from .api.shots import router as shots_router
 from .db.migrations import initialize_database
 
 initialize_database()
@@ -32,6 +33,7 @@ app.include_router(stories_router)
 app.include_router(episodes_router)
 app.include_router(chapters_router)
 app.include_router(scenes_router)
+app.include_router(shots_router)
 
 
 @app.get("/api/health")

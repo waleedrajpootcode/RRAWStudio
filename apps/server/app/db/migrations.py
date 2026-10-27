@@ -1,7 +1,7 @@
 from .connection import get_connection
 
 
-CURRENT_SCHEMA_VERSION = 4
+CURRENT_SCHEMA_VERSION = 6
 
 
 def _migration_1(connection) -> None:
@@ -164,6 +164,45 @@ def _migration_5(connection) -> None:
     )
 
 
+
+
+
+def _migration_6(connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS shots (
+            id TEXT PRIMARY KEY,
+            scene_id TEXT NOT NULL,
+            shot_number INTEGER NOT NULL,
+            title TEXT NOT NULL DEFAULT '',
+            duration REAL NOT NULL DEFAULT 0,
+            camera TEXT NOT NULL DEFAULT '',
+            composition TEXT NOT NULL DEFAULT '',
+            characters TEXT NOT NULL DEFAULT '',
+            poses TEXT NOT NULL DEFAULT '',
+            emotion TEXT NOT NULL DEFAULT '',
+            dialogue TEXT NOT NULL DEFAULT '',
+            background TEXT NOT NULL DEFAULT '',
+            midground TEXT NOT NULL DEFAULT '',
+            foreground TEXT NOT NULL DEFAULT '',
+            effects TEXT NOT NULL DEFAULT '',
+            lighting TEXT NOT NULL DEFAULT '',
+            motion TEXT NOT NULL DEFAULT '',
+            transition TEXT NOT NULL DEFAULT '',
+            music TEXT NOT NULL DEFAULT '',
+            sfx TEXT NOT NULL DEFAULT '',
+            render_settings TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'draft'
+                CHECK (status IN ('draft', 'approved')),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            UNIQUE (scene_id, shot_number),
+            FOREIGN KEY (scene_id) REFERENCES scenes(id) ON DELETE CASCADE
+        )
+        """
+    )
+
+
 def initialize_database() -> None:
     connection = get_connection()
 
@@ -221,6 +260,15 @@ def initialize_database() -> None:
             "INSERT INTO schema_version (version, applied_at) VALUES (?, ?)",
             (5, datetime.now(timezone.utc).isoformat()),
         )
+        current_version = 5
+
+    if current_version < 6:
+        _migration_6(connection)
+        connection.execute(
+            "INSERT INTO schema_version (version, applied_at) VALUES (?, ?)",
+            (6, datetime.now(timezone.utc).isoformat()),
+        )
+        current_version = 6
 
     connection.commit()
     connection.close()
