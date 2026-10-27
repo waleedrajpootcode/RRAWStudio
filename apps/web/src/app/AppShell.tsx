@@ -5,6 +5,7 @@ import ProjectsPage from "../pages/ProjectsPage";
 import ProjectWorkspacePage from "../pages/ProjectWorkspacePage";
 import UniversePage from "../pages/UniversePage";
 import CharactersPage from "../pages/CharactersPage";
+import StoryPage from "../pages/StoryPage";
 import { ProjectProvider } from "./ProjectContext";
 
 const routeMap: Record<string, string> = {
@@ -27,11 +28,17 @@ function projectIdFromCharactersPath(pathname: string) {
   return match?.[1] ?? null;
 }
 
+function projectIdFromStoryPath(pathname: string) {
+  const match = pathname.match(/^\/projects\/([^/]+)\/story$/);
+  return match?.[1] ?? null;
+}
+
 const pathForItem: Record<string, string> = {
   Dashboard: "/",
   Projects: "/projects",
   Universe: "/universe",
   Characters: "/characters",
+  Story: "/story",
 };
 
 function itemFromPath(pathname: string) {
@@ -41,6 +48,10 @@ function itemFromPath(pathname: string) {
 
   if (projectIdFromCharactersPath(pathname)) {
     return "Characters";
+  }
+
+  if (projectIdFromStoryPath(pathname)) {
+    return "Story";
   }
 
   if (projectIdFromPath(pathname)) {
@@ -74,14 +85,18 @@ export default function AppShell() {
 
     const currentProjectId =
       projectIdFromPath(window.location.pathname) ??
-      projectIdFromUniversePath(window.location.pathname);
+      projectIdFromUniversePath(window.location.pathname) ??
+      projectIdFromCharactersPath(window.location.pathname) ??
+      projectIdFromStoryPath(window.location.pathname);
 
     const resolvedPath =
       item === "Universe" && currentProjectId
         ? `/projects/${currentProjectId}/universe`
         : item === "Characters" && currentProjectId
           ? `/projects/${currentProjectId}/characters`
-          : nextPath;
+          : item === "Story" && currentProjectId
+            ? `/projects/${currentProjectId}/story`
+            : nextPath;
 
     if (resolvedPath && window.location.pathname !== resolvedPath) {
       window.history.pushState({}, "", resolvedPath);
@@ -94,7 +109,8 @@ export default function AppShell() {
   const projectId =
     projectIdFromPath(window.location.pathname) ??
     projectIdFromUniversePath(window.location.pathname) ??
-    projectIdFromCharactersPath(window.location.pathname);
+    projectIdFromCharactersPath(window.location.pathname) ??
+    projectIdFromStoryPath(window.location.pathname);
 
   const isUniverseRoute = Boolean(
     projectIdFromUniversePath(window.location.pathname),
@@ -102,6 +118,10 @@ export default function AppShell() {
 
   const isCharactersRoute = Boolean(
     projectIdFromCharactersPath(window.location.pathname),
+  );
+
+  const isStoryRoute = Boolean(
+    projectIdFromStoryPath(window.location.pathname),
   );
 
   return (
@@ -112,6 +132,8 @@ export default function AppShell() {
             <UniversePage />
           ) : isCharactersRoute ? (
             <CharactersPage />
+          ) : isStoryRoute ? (
+            <StoryPage />
           ) : (
             <ProjectWorkspacePage />
           )}

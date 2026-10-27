@@ -1,7 +1,7 @@
 ﻿from .connection import get_connection
 
 
-CURRENT_SCHEMA_VERSION = 3
+CURRENT_SCHEMA_VERSION = 4
 
 
 def _migration_1(connection) -> None:
@@ -73,6 +73,29 @@ def _migration_3(connection) -> None:
     )
 
 
+def _migration_4(connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS stories (
+            id TEXT PRIMARY KEY,
+            project_id TEXT NOT NULL UNIQUE,
+            concept TEXT NOT NULL DEFAULT '',
+            logline TEXT NOT NULL DEFAULT '',
+            theme TEXT NOT NULL DEFAULT '',
+            summary TEXT NOT NULL DEFAULT '',
+            genre TEXT NOT NULL DEFAULT '',
+            tone TEXT NOT NULL DEFAULT '',
+            narrative_direction TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'draft'
+                CHECK (status IN ('draft', 'approved')),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+        )
+        """
+    )
+
+
 def initialize_database() -> None:
     connection = get_connection()
 
@@ -112,6 +135,15 @@ def initialize_database() -> None:
         connection.execute(
             "INSERT INTO schema_version (version, applied_at) VALUES (?, ?)",
             (3, datetime.now(timezone.utc).isoformat()),
+        )
+
+        current_version = 3
+
+    if current_version < 4:
+        _migration_4(connection)
+        connection.execute(
+            "INSERT INTO schema_version (version, applied_at) VALUES (?, ?)",
+            (4, datetime.now(timezone.utc).isoformat()),
         )
 
     connection.commit()
