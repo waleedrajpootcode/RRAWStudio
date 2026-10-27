@@ -1,10 +1,13 @@
-﻿from fastapi import FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .api.projects import router as projects_router
 from .api.universes import router as universes_router
 from .api.characters import router as characters_router
 from .api.stories import router as stories_router
+from .api.episodes import router as episodes_router
+from .api.chapters import router as chapters_router
+from .api.scenes import router as scenes_router
 from .db.migrations import initialize_database
 
 initialize_database()
@@ -26,6 +29,9 @@ app.include_router(projects_router)
 app.include_router(universes_router)
 app.include_router(characters_router)
 app.include_router(stories_router)
+app.include_router(episodes_router)
+app.include_router(chapters_router)
+app.include_router(scenes_router)
 
 
 @app.get("/api/health")

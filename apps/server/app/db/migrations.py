@@ -1,4 +1,4 @@
-﻿from .connection import get_connection
+from .connection import get_connection
 
 
 CURRENT_SCHEMA_VERSION = 4
@@ -96,6 +96,74 @@ def _migration_4(connection) -> None:
     )
 
 
+
+def _migration_5(connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS episodes (
+            id TEXT PRIMARY KEY,
+            project_id TEXT NOT NULL,
+            story_id TEXT,
+            episode_number INTEGER NOT NULL,
+            title TEXT NOT NULL DEFAULT '',
+            summary TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'draft'
+                CHECK (status IN ('draft', 'approved')),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            UNIQUE (project_id, episode_number),
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE SET NULL
+        )
+        """
+    )
+
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS chapters (
+            id TEXT PRIMARY KEY,
+            episode_id TEXT NOT NULL,
+            chapter_number INTEGER NOT NULL,
+            title TEXT NOT NULL DEFAULT '',
+            summary TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'draft'
+                CHECK (status IN ('draft', 'approved')),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            UNIQUE (episode_id, chapter_number),
+            FOREIGN KEY (episode_id) REFERENCES episodes(id) ON DELETE CASCADE
+        )
+        """
+    )
+
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS scenes (
+            id TEXT PRIMARY KEY,
+            chapter_id TEXT NOT NULL,
+            scene_number INTEGER NOT NULL,
+            title TEXT NOT NULL DEFAULT '',
+            location TEXT NOT NULL DEFAULT '',
+            time_of_day TEXT NOT NULL DEFAULT '',
+            characters TEXT NOT NULL DEFAULT '',
+            actions TEXT NOT NULL DEFAULT '',
+            dialogue TEXT NOT NULL DEFAULT '',
+            emotion TEXT NOT NULL DEFAULT '',
+            lighting TEXT NOT NULL DEFAULT '',
+            atmosphere TEXT NOT NULL DEFAULT '',
+            camera_audio_intent TEXT NOT NULL DEFAULT '',
+            continuity TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'draft'
+                CHECK (status IN ('draft', 'approved')),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            UNIQUE (chapter_id, scene_number),
+            FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE CASCADE
+        )
+        """
+    )
+
+
 def initialize_database() -> None:
     connection = get_connection()
 
@@ -144,6 +212,14 @@ def initialize_database() -> None:
         connection.execute(
             "INSERT INTO schema_version (version, applied_at) VALUES (?, ?)",
             (4, datetime.now(timezone.utc).isoformat()),
+        )
+        current_version = 4
+
+    if current_version < 5:
+        _migration_5(connection)
+        connection.execute(
+            "INSERT INTO schema_version (version, applied_at) VALUES (?, ?)",
+            (5, datetime.now(timezone.utc).isoformat()),
         )
 
     connection.commit()
