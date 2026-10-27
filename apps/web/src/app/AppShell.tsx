@@ -7,6 +7,7 @@ import UniversePage from "../pages/UniversePage";
 import CharactersPage from "../pages/CharactersPage";
 import StoryPage from "../pages/StoryPage";
 import EpisodesPage from "../pages/EpisodesPage";
+import ShotStudioPage from "../pages/ShotStudioPage";
 import { ProjectProvider } from "./ProjectContext";
 
 const routeMap: Record<string, string> = {
@@ -39,6 +40,11 @@ function projectIdFromEpisodesPath(pathname: string) {
   return match?.[1] ?? null;
 }
 
+function projectIdFromShotsPath(pathname: string) {
+  const match = pathname.match(/^\/projects\/([^/]+)\/shots$/);
+  return match?.[1] ?? null;
+}
+
 const pathForItem: Record<string, string> = {
   Dashboard: "/",
   Projects: "/projects",
@@ -46,6 +52,7 @@ const pathForItem: Record<string, string> = {
   Characters: "/characters",
   Story: "/story",
   Episodes: "/episodes",
+  Shots: "/shots",
 };
 
 function itemFromPath(pathname: string) {
@@ -63,6 +70,10 @@ function itemFromPath(pathname: string) {
 
   if (projectIdFromEpisodesPath(pathname)) {
     return "Episodes";
+  }
+
+  if (projectIdFromShotsPath(pathname)) {
+    return "Shots";
   }
 
   if (projectIdFromPath(pathname)) {
@@ -99,7 +110,8 @@ export default function AppShell() {
       projectIdFromUniversePath(window.location.pathname) ??
       projectIdFromCharactersPath(window.location.pathname) ??
       projectIdFromStoryPath(window.location.pathname) ??
-      projectIdFromEpisodesPath(window.location.pathname);
+      projectIdFromEpisodesPath(window.location.pathname) ??
+      projectIdFromShotsPath(window.location.pathname);
 
     const resolvedPath =
       item === "Universe" && currentProjectId
@@ -110,7 +122,9 @@ export default function AppShell() {
             ? `/projects/${currentProjectId}/story`
             : item === "Episodes" && currentProjectId
               ? `/projects/${currentProjectId}/episodes`
-              : nextPath;
+              : item === "Shots" && currentProjectId
+                ? `/projects/${currentProjectId}/shots`
+                : nextPath;
 
     if (resolvedPath && window.location.pathname !== resolvedPath) {
       window.history.pushState({}, "", resolvedPath);
@@ -143,6 +157,10 @@ export default function AppShell() {
     projectIdFromEpisodesPath(window.location.pathname),
   );
 
+  const isShotsRoute = Boolean(
+    projectIdFromShotsPath(window.location.pathname),
+  );
+
   return (
     <StudioLayout activeItem={activeItem} onSelect={handleSelect}>
       {projectId ? (
@@ -155,6 +173,8 @@ export default function AppShell() {
             <StoryPage />
           ) : isEpisodesRoute ? (
             <EpisodesPage />
+          ) : isShotsRoute ? (
+            <ShotStudioPage />
           ) : (
             <ProjectWorkspacePage />
           )}

@@ -26,7 +26,7 @@ export type CharacterDraft = Omit<
   "id" | "project_id" | "created_at" | "updated_at"
 >;
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "http://127.0.0.1:8001";
 
 async function request<T>(
   url: string,
