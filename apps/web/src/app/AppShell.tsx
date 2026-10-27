@@ -4,6 +4,7 @@ import DashboardPage from "../pages/DashboardPage";
 import ProjectsPage from "../pages/ProjectsPage";
 import ProjectWorkspacePage from "../pages/ProjectWorkspacePage";
 import UniversePage from "../pages/UniversePage";
+import CharactersPage from "../pages/CharactersPage";
 import { ProjectProvider } from "./ProjectContext";
 
 const routeMap: Record<string, string> = {
@@ -21,15 +22,25 @@ function projectIdFromUniversePath(pathname: string) {
   return match?.[1] ?? null;
 }
 
+function projectIdFromCharactersPath(pathname: string) {
+  const match = pathname.match(/^\/projects\/([^/]+)\/characters$/);
+  return match?.[1] ?? null;
+}
+
 const pathForItem: Record<string, string> = {
   Dashboard: "/",
   Projects: "/projects",
   Universe: "/universe",
+  Characters: "/characters",
 };
 
 function itemFromPath(pathname: string) {
   if (projectIdFromUniversePath(pathname)) {
     return "Universe";
+  }
+
+  if (projectIdFromCharactersPath(pathname)) {
+    return "Characters";
   }
 
   if (projectIdFromPath(pathname)) {
@@ -68,7 +79,9 @@ export default function AppShell() {
     const resolvedPath =
       item === "Universe" && currentProjectId
         ? `/projects/${currentProjectId}/universe`
-        : nextPath;
+        : item === "Characters" && currentProjectId
+          ? `/projects/${currentProjectId}/characters`
+          : nextPath;
 
     if (resolvedPath && window.location.pathname !== resolvedPath) {
       window.history.pushState({}, "", resolvedPath);
@@ -80,17 +93,28 @@ export default function AppShell() {
 
   const projectId =
     projectIdFromPath(window.location.pathname) ??
-    projectIdFromUniversePath(window.location.pathname);
+    projectIdFromUniversePath(window.location.pathname) ??
+    projectIdFromCharactersPath(window.location.pathname);
 
   const isUniverseRoute = Boolean(
     projectIdFromUniversePath(window.location.pathname),
+  );
+
+  const isCharactersRoute = Boolean(
+    projectIdFromCharactersPath(window.location.pathname),
   );
 
   return (
     <StudioLayout activeItem={activeItem} onSelect={handleSelect}>
       {projectId ? (
         <ProjectProvider projectId={projectId}>
-          {isUniverseRoute ? <UniversePage /> : <ProjectWorkspacePage />}
+          {isUniverseRoute ? (
+            <UniversePage />
+          ) : isCharactersRoute ? (
+            <CharactersPage />
+          ) : (
+            <ProjectWorkspacePage />
+          )}
         </ProjectProvider>
       ) : activeItem === "Projects" ? (
         <ProjectsPage />

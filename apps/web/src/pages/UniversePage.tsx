@@ -114,63 +114,140 @@ export default function UniversePage() {
     return <section className="projects-page">Project context unavailable.</section>;
   }
 
+  const fieldMap = Object.fromEntries(fields) as Record<
+    (typeof fields)[number][0],
+    string
+  >;
+
+  function renderField(
+    key: (typeof fields)[number][0],
+    wide = false,
+  ) {
+    return (
+      <label
+        className={`universe-field${wide ? " universe-field-wide" : ""}`}
+        key={key}
+      >
+        <span>{fieldMap[key]}</span>
+        <textarea
+          value={draft[key]}
+          onChange={(event) =>
+            setDraft((current) => ({
+              ...current,
+              [key]: event.target.value,
+            }))
+          }
+          rows={key === "premise" ? 4 : 5}
+          placeholder={`Define ${fieldMap[key].toLowerCase()}...`}
+          disabled={loading || saving}
+        />
+      </label>
+    );
+  }
+
   return (
-    <section className="projects-page">
-      <div className="section-heading">
+    <section className="projects-page universe-page">
+      <div className="universe-header">
         <div>
-          <p className="eyebrow">WORLD MEMORY</p>
+          <p className="eyebrow">WORLD MEMORY / WORLD BIBLE</p>
           <h2>Universe</h2>
-        </div>
-        <span>{project.name}</span>
-      </div>
-
-      <form className="project-workspace-grid" onSubmit={handleSubmit}>
-        <div className="project-create-panel">
-          <p className="eyebrow">UNIVERSE FOUNDATION</p>
-          <h3>Define the world.</h3>
           <p>
-            Capture the creative rules and identity that future stories,
-            characters and scenes can inherit.
+            The canonical creative foundation for {project.name}. Characters,
+            stories and scenes will inherit relevant world context from here.
           </p>
+        </div>
 
-          <button className="primary-button" type="submit" disabled={loading || saving}>
+        <div className="universe-header-actions">
+          <span>{project.name}</span>
+          <button
+            className="primary-button"
+            type="submit"
+            form="universe-form"
+            disabled={loading || saving}
+          >
             {saving ? "Saving..." : "Save Universe"}
           </button>
-
-          {message && <div className="project-error">{message}</div>}
         </div>
+      </div>
 
-        <div className="project-list-panel">
-          <div className="panel-heading">
+      <form
+        id="universe-form"
+        className="universe-studio"
+        onSubmit={handleSubmit}
+      >
+        <section className="universe-section universe-identity">
+          <div className="universe-section-heading">
             <div>
-              <p className="eyebrow">WORLD BIBLE</p>
-              <h3>Creative direction</h3>
+              <p className="eyebrow">01 / IDENTITY</p>
+              <h3>World Identity</h3>
             </div>
-            <span>Project-bound memory</span>
+            <span>Core premise & narrative tone</span>
           </div>
 
-          <div className="project-list">
-            {fields.map(([key, label]) => (
-              <label className="project-card" key={key}>
-                <div className="project-card-copy">
-                  <strong>{label}</strong>
-                  <textarea
-                    value={draft[key]}
-                    onChange={(event) =>
-                      setDraft((current) => ({
-                        ...current,
-                        [key]: event.target.value,
-                      }))
-                    }
-                    rows={key === "premise" ? 3 : 2}
-                    placeholder={`Define ${label.toLowerCase()}...`}
-                    disabled={loading || saving}
-                  />
-                </div>
-              </label>
-            ))}
+          <div className="universe-grid">
+            {renderField("premise", true)}
+            {renderField("genre")}
+            {renderField("tone")}
           </div>
-        </div>
+        </section>
+
+        <section className="universe-section">
+          <div className="universe-section-heading">
+            <div>
+              <p className="eyebrow">02 / ART DIRECTION</p>
+              <h3>Visual Language</h3>
+            </div>
+            <span>Style, color & atmosphere</span>
+          </div>
+
+          <div className="universe-grid">
+            {renderField("visual_style")}
+            {renderField("color_palette")}
+            {renderField("atmosphere", true)}
+          </div>
+        </section>
+
+        <section className="universe-section">
+          <div className="universe-section-heading">
+            <div>
+              <p className="eyebrow">03 / CANON</p>
+              <h3>World Rules</h3>
+            </div>
+            <span>Rules the production must respect</span>
+          </div>
+
+          <div className="universe-grid">
+            {renderField("world_rules", true)}
+          </div>
+        </section>
+
+        <section className="universe-section universe-dual-section">
+          <div>
+            <div className="universe-section-heading">
+              <div>
+                <p className="eyebrow">04 / HISTORY</p>
+                <h3>Lore</h3>
+              </div>
+            </div>
+            {renderField("lore")}
+          </div>
+
+          <div>
+            <div className="universe-section-heading">
+              <div>
+                <p className="eyebrow">05 / CHRONOLOGY</p>
+                <h3>Timeline</h3>
+              </div>
+            </div>
+            {renderField("timeline")}
+          </div>
+        </section>
+
+        {message && (
+          <div className="universe-save-message" role="status">
+            {message}
+          </div>
+        )}
       </form>
     </section>
   );
